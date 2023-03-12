@@ -3,6 +3,8 @@
  */
 package io.mosip.kernel.smsserviceprovider.fast2sms.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -72,9 +74,13 @@ public class SMSServiceProviderImpl implements SMSServiceProvider {
 				.queryParam(SmsPropertyConstant.COUNTRY_CODE.getProperty(), countryCode)
 				.queryParam(SmsPropertyConstant.LANGUAGE.getProperty(),language);
 		try {
-			restTemplate.getForEntity(sms.toUriString(), String.class);
+			ObjectMapper mapper = new ObjectMapper();
+			System.out.println(mapper.writeValueAsString((Object) restTemplate.getForObject(sms.build().toUri(), Object.class)));
+//			restTemplate.getForEntity(sms.toUriString(), String.class);
 		} catch (HttpClientErrorException | HttpServerErrorException e) {
 			throw new RuntimeException(e.getResponseBodyAsString());
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e.getMessage());
 		}
 		smsResponseDTO.setMessage(SmsPropertyConstant.SUCCESS_RESPONSE.getProperty());
 		smsResponseDTO.setStatus("success");
